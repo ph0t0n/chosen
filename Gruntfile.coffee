@@ -24,10 +24,10 @@ module.exports = (grunt) ->
         banner: "<%= comments %>"
       jquery:
         src: ["public/chosen.jquery.js"]
-        dest: "public/chosen.jquery.js"
+        dest: "public/chosen.jquery.js"     
       proto:
         src: ["public/chosen.proto.js"]
-        dest: "public/chosen.proto.js"
+        dest: "public/chosen.proto.js"     
 
     coffee:
       options:

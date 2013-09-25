@@ -27,7 +27,7 @@ class AbstractChosen
     @single_backstroke_delete = if @options.single_backstroke_delete? then @options.single_backstroke_delete else true
     @max_selected_options = @options.max_selected_options || Infinity
     @inherit_select_classes = @options.inherit_select_classes || false
-    @display_selected_options = if @options.display_selected_options? then @options.display_selected_options else true
+    @display_selected_options = false
     @display_disabled_options = if @options.display_disabled_options? then @options.display_disabled_options else true
 
   set_default_text: ->
@@ -56,20 +56,36 @@ class AbstractChosen
 
   results_option_build: (options) ->
     content = ''
+    if @is_multiple and options?.first
+      selected = @form_field_jq.attr('value').split(' ')
+      results_data = $.extend([], @results_data)
+      $results_data = @results_data
+
+      $.each @results_data, (i,data) ->
+        if data.text in selected
+          j=selected.indexOf(data.text)
+          t=$results_data[j]
+          $results_data[j] = data
+          $results_data[i] = t   
     for data in @results_data
       if data.group
         content += this.result_add_group data
       else
         content += this.result_add_option data
 
-      # this select logic pins on an awkward flag
-      # we can make it better
       if options?.first
         if data.selected and @is_multiple
           this.choice_build data
         else if data.selected and not @is_multiple
           this.single_set_selected_text(data.text)
 
+    if @is_multiple and options?.first
+      @form_field_jq.html('')
+      $form_field_jq = @form_field_jq
+      $.each @search_choices.find('.search-choice'), (i,v) ->
+        $v = $ v
+        $form_field_jq.append("<option value='#{$v.text()}' selected='selected'>#{$v.text()}</option>")
+      @results_data = results_data if results_data?
     content
 
   result_add_option: (option) ->

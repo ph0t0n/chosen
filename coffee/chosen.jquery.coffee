@@ -173,8 +173,7 @@ class Chosen extends AbstractChosen
   results_build: ->
     @parsing = true
     @selected_option_count = null
-
-    @results_data = SelectParser.select_to_array @form_field
+    @results_data = SelectParser.select_to_array @form_field    
 
     if @is_multiple
       @search_choices.find("li.search-choice").remove()
@@ -340,19 +339,23 @@ class Chosen extends AbstractChosen
       item = @results_data[ high[0].getAttribute("data-option-array-index") ]
       item.selected = true
 
-      @form_field.options[item.options_index].selected = true
       @selected_option_count = null
 
       if @is_multiple
         this.choice_build item
+        @form_field_jq.html('')
+        $form_field_jq = @form_field_jq
+        $.each @search_choices.find('.search-choice'), (i,v) ->
+          $v = $ v
+          $form_field_jq.append("<option value='#{$v.text()}' selected='selected'>#{$v.text()}</option>")
       else
+        @form_field.options[item.options_index].selected = true
         this.single_set_selected_text(item.text)
 
       this.results_hide() unless (evt.metaKey or evt.ctrlKey) and @is_multiple
 
       @search_field.val ""
 
-      @form_field_jq.trigger "change", {'selected': @form_field.options[item.options_index].value} if @is_multiple || @form_field.selectedIndex != @current_selectedIndex
       @current_selectedIndex = @form_field.selectedIndex
       this.search_field_scale()
 
@@ -367,22 +370,18 @@ class Chosen extends AbstractChosen
 
   result_deselect: (pos) ->
     result_data = @results_data[pos]
-
-    if not @form_field.options[result_data.options_index].disabled
-      result_data.selected = false
-
-      @form_field.options[result_data.options_index].selected = false
-      @selected_option_count = null
-
-      this.result_clear_highlight()
-      this.winnow_results() if @results_showing
-
-      @form_field_jq.trigger "change", {deselected: @form_field.options[result_data.options_index].value}
-      this.search_field_scale()
-
-      return true
+    if @is_multiple
+      @form_field_jq.find("option[value='#{result_data.value}']").remove()
     else
-      return false
+      @form_field.options[result_data.options_index].selected = false
+
+    result_data.selected = false
+    @selected_option_count = null
+
+    this.result_clear_highlight()
+    this.winnow_results() if @results_showing
+
+    this.search_field_scale()
 
   single_deselect_control_build: ->
     return unless @allow_single_deselect
