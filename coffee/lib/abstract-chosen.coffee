@@ -57,16 +57,18 @@ class AbstractChosen
   results_option_build: (options) ->
     content = ''
     if @is_multiple and options?.first
-      selected = @form_field_jq.attr('value').split(' ')
+      selected = if @form_field_jq.attr('value') then @form_field_jq.attr('value').split(' ') else []
       results_data = $.extend([], @results_data)
       $results_data = @results_data
 
       $.each @results_data, (i,data) ->
-        if data.text in selected
-          j=selected.indexOf(data.text)
+        if data.value in selected
+          data.selected = true
+          j=selected.indexOf(data.value)
           t=$results_data[j]
           $results_data[j] = data
-          $results_data[i] = t   
+          $results_data[i] = t
+
     for data in @results_data
       if data.group
         content += this.result_add_group data
@@ -84,7 +86,8 @@ class AbstractChosen
       $form_field_jq = @form_field_jq
       $.each @search_choices.find('.search-choice'), (i,v) ->
         $v = $ v
-        $form_field_jq.append("<option value='#{$v.text()}' selected='selected'>#{$v.text()}</option>")
+        value = $v.find('.search-choice-close').data('value')
+        $form_field_jq.append("<option value='#{value}' selected='selected'>#{$v.text()}</option>")
       @results_data = results_data if results_data?
     content
 
@@ -166,7 +169,7 @@ class AbstractChosen
           results_group = @results_data[option.group_array_index]
           results += 1 if results_group.active_options is 0 and results_group.search_match
           results_group.active_options += 1
-                
+
         unless option.group and not @group_search
 
           option.search_text = if option.group then option.label else option.html
@@ -180,7 +183,7 @@ class AbstractChosen
               option.search_text = text.substr(0, startpos) + '<em>' + text.substr(startpos)
 
             results_group.group_match = true if results_group?
-          
+
           else if option.group_array_index? and @results_data[option.group_array_index].search_match
             option.search_match = true
 
@@ -210,7 +213,7 @@ class AbstractChosen
     @selected_option_count = 0
     for option in @form_field.options
       @selected_option_count += 1 if option.selected
-    
+
     return @selected_option_count
 
   choices_click: (evt) ->
@@ -265,7 +268,7 @@ class AbstractChosen
     tmp.appendChild(element)
     tmp.innerHTML
 
-  # class methods and variables ============================================================ 
+  # class methods and variables ============================================================
 
   @browser_is_supported: ->
     if window.navigator.appName == "Microsoft Internet Explorer"

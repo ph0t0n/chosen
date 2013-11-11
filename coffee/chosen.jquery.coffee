@@ -59,7 +59,7 @@ class Chosen extends AbstractChosen
     else
       @search_container = @container.find('div.chosen-search').first()
       @selected_item = @container.find('.chosen-single').first()
-    
+
     this.results_build()
     this.set_tab_index()
     this.set_label_behavior()
@@ -173,7 +173,7 @@ class Chosen extends AbstractChosen
   results_build: ->
     @parsing = true
     @selected_option_count = null
-    @results_data = SelectParser.select_to_array @form_field    
+    @results_data = SelectParser.select_to_array @form_field
 
     if @is_multiple
       @search_choices.find("li.search-choice").remove()
@@ -287,10 +287,10 @@ class Chosen extends AbstractChosen
     if item.disabled
       choice.addClass 'search-choice-disabled'
     else
-      close_link = $('<a />', { class: 'search-choice-close', 'data-option-array-index': item.array_index })
+      close_link = $('<a />', { class: 'search-choice-close', 'data-option-array-index': item.array_index, 'data-value': item.value })
       close_link.bind 'click.chosen', (evt) => this.choice_destroy_link_click(evt)
       choice.append close_link
-    
+
     @search_container.before  choice
 
   choice_destroy_link_click: (evt) ->
@@ -347,7 +347,8 @@ class Chosen extends AbstractChosen
         $form_field_jq = @form_field_jq
         $.each @search_choices.find('.search-choice'), (i,v) ->
           $v = $ v
-          $form_field_jq.append("<option value='#{$v.text()}' selected='selected'>#{$v.text()}</option>")
+          value = $v.find('.search-choice-close').data('value')
+          $form_field_jq.append("<option value='#{value}' selected='selected'>#{$v.text()}</option>")
       else
         @form_field.options[item.options_index].selected = true
         this.single_set_selected_text(item.text)
